@@ -12,10 +12,10 @@ jobs:
     environment: NonProd
     runs-on: ubuntu-latest
     steps:
-      # Checkout code
-    - uses: actions/checkout@main
+      # Checkout code
+    - uses: actions/checkout@main
       # Log into Azure
-    - uses: azure/login@v1
+    - uses: azure/login@v1
       with:
         client-id: ${{ secrets.AZURE_CLIENT_NONPROD }}
         tenant-id: ${{ secrets.AZURE_TENANT_NONPROD }}
