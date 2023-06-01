@@ -1,0 +1,51 @@
+on:
+  workflow_dispatch:
+  
+name: deploy Non-prod
+jobs:
+  deploy:
+    environment: NonProd
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code
+    - uses: actions/checkout@main
+
+      # Log into Azure
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CONNECTION_NONPROD }}
+
+    - name: deploy_NonProd_keyvault
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_NONPROD }}
+        resourceGroupName: ${{ secrets.AZURE_RG_NONPROD }}
+        template: ./infra-services/Non-Prod/keyvault/NonProd_kv_deployment.json
+        parameters: ./infra-services/Non-Prod/keyvault/NonProd_kv_parameters.json
+        
+       # Deploy ARM template
+    - name: deploy_NonProd_vnet
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_NONPROD }}
+        resourceGroupName: ${{ secrets.AZURE_RG_NONPROD }}
+        template: ./infra-services/Non-Prod/vnet/NonProd_vnet_deployment.json
+        parameters: ./infra-services/Non-Prod/vnet/NonProd_vnet_parameters.json
+
+      # Deploy ARM template
+    - name: deploy_NonProd_appgw
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_NONPROD }}
+        resourceGroupName: ${{ secrets.AZURE_RG_NONPROD }}
+        template: ./infra-services/Non-Prod/appgw/Non-Prod_agw_deployment.json
+        parameters: ./infra-services/Non-Prod/appgw/Non-Prod_agw_parameters.json
+
+      # Deploy ARM template  
+    - name: deploy_NonProd_aks
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_NONPROD }}
+        resourceGroupName: ${{ secrets.AZURE_RG_NONPROD }}
+        template: ./infra-services/Non-Prod/aks/Non-Prod_aks_deployment.json
+        parameters: ./infra-services/Non-Prod/aks/Non-Prod_aksparameters.json
