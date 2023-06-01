@@ -1,0 +1,91 @@
+on:
+
+  workflow_dispatch:
+
+
+name: deploy Non-prod
+
+permissions:
+
+  id-token: write
+
+  contents: read
+
+ 
+
+env:
+
+  RESOURCE_GROUP_NAME: rg-azureplex
+
+  RESOURCE_GROUP_LOCATION: westeurope
+
+ 
+
+jobs:
+
+  deploy:
+
+    environment: NonProd
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # Checkout code
+
+    - uses: actions/checkout@main
+
+ 
+
+      # Log into Azure
+
+    - uses: azure/login@v1
+
+      with:
+
+        client-id: ${{ secrets.AZURE_CLIENT_NONPROD }}
+
+        tenant-id: ${{ secrets.AZURE_TENANT_NONPROD }}
+
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_NONPROD }}
+
+
+      # Create resource group
+
+    - uses: Azure/CLI@v1
+
+      name: Create resource group
+
+      with:
+
+        inlinescript: |
+
+          #!/bin/bash
+
+          if $(az group exists --name ${{ env.RESOURCE_GROUP_NAME }}) ; then
+
+          echo "Azure resource group already exists, skipping creation..."
+
+          else
+
+          az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location ${{ env.RESOURCE_GROUP_LOCATION }}
+
+          echo "Azure resource group created"
+
+          fi
+
+ 
+
+      # Deploy ARM template  
+
+    - name: deploy_NonProd_VM
+
+      uses: azure/arm-deploy@v1
+
+      with:
+
+        scope: resourcegroup
+
+        resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
+
+        template: ./azureplex/AzurePlex/vm.json
